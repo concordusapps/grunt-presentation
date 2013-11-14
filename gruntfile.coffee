@@ -2,6 +2,10 @@
 
 module.exports = (grunt) ->
 
+  # Utilities
+  # =========
+  path = require 'path'
+
   # Options
   # =======
 
@@ -25,26 +29,151 @@ module.exports = (grunt) ->
     # Configure 'grunt-contrib-clean' to remove all built and temporary
     # files.
     clean:
+      bower: [
+        'temp/bower_components'
+      ]
+
       all: [
         'build'
         'temp'
       ]
 
+    # Symlink
+    # -------
+    # Ensure that the temporary directories can access the bower components.
+    symlink:
+      bower:
+        src: 'bower_components'
+        dest: 'temp/bower_components'
+
+    # Copy
+    # ----
+    # Ensure files go where they need to. Used for static files.
+    copy:
+      static:
+        files: [
+          expand: true
+          filter: 'isFile'
+          cwd: 'src'
+          dest: 'temp'
+          src: [
+            '**/*'
+            '!**/*.ls'
+            '!**/*.scss'
+            '!**/*.haml'
+          ]
+        ]
+
     # Script
     # ------
-    coffee:
+    livescript:
       compile:
         files: [
           expand: true
           filter: 'isFile'
-          cwd: "src/scripts"
-          dest: "temp/scripts"
-          src: '**/*.coffee'
+          cwd: 'src'
+          dest: 'temp'
+          src: '**/*.ls'
           ext: '.js'
         ]
 
         options:
           bare: true
+
+    # Templates
+    # ---------
+    haml:
+      compile:
+        files: [
+          expand: true
+          filter: 'isFile'
+          cwd: 'src'
+          dest: 'temp'
+          src: '**/*.haml'
+          ext: '.html'
+        ]
+
+        options:
+          target: 'html'
+          language: 'coffee'
+          uglify: true
+
+    # Slides
+    # ------
+    markdown:
+      render:
+        files: [
+          expand: true
+          filter: 'isFile'
+          cwd: 'src'
+          dest: 'temp'
+          src: '**/*.md'
+          ext: '.html'
+        ]
+
+        options:
+          template: 'src/slides/slide.jst'
+
+    # Webserver
+    # ---------
+    connect:
+      options:
+        port: 5000 + portOffset
+        hostname: hostname
+        middleware: (connect, options) -> [
+          require('connect-livereload')()
+          connect.static options.base
+        ]
+
+      build:
+        options:
+          keepalive: true
+          base: 'build'
+
+      temp:
+        options:
+          base: 'temp'
+
+    # Stylesheets
+    # -----------
+    sass:
+      compile:
+        dest: 'temp/styles/main.css'
+        src: 'src/styles/main.scss'
+        options:
+          loadPath: path.join(path.resolve('.'), 'temp')
+
+    # Watch
+    # -----
+    watch:
+      bower:
+        files: ['bower_components/**/*']
+        tasks: ['symlink:bower']
+
+      haml:
+        files: ['src/**/*.haml']
+        tasks: ['haml:compile']
+
+      markdown:
+        files: ['src/**/*.md']
+        tasks: ['markdown:render']
+
+      livescript:
+        files: ['src/**/*.ls']
+        tasks: ['livescript:compile']
+
+      sass:
+        files: ['src/**/*.scss']
+        tasks: ['sass:compile']
+
+      livereload:
+        options: {livereload: true}
+        files: ['temp/**/*']
+
+  # Dependencies
+  # ============
+  # Loads all grunt tasks from the installed NPM modules.
+  require('matchdep').filterDev('grunt-*').forEach grunt.loadNpmTasks
 
   # Tasks
   # =====
@@ -61,30 +190,29 @@ module.exports = (grunt) ->
   # Server
   # ------
   grunt.registerTask 'server', [
-    # 'livereload-start'
-    # 'copy:static'
-    'coffee'
-    # 'haml'
-    # 'sass'
-    # 'connect:temp'
-    # 'proxy',
-    # 'compliment',
-    # 'regarde'
+    'symlink:bower'
+    'copy:static'
+    'livescript:compile'
+    'haml:compile'
+    'sass:compile'
+    'markdown:render'
+    'connect:temp'
+    'watch'
   ]
 
   # # Build
   # # -----
   # grunt.registerTask 'build', [
-  #   'prepare',
+  #   'clean',
   #   'copy:static'
-  #   'script'
-  #   'haml'
-  #   'sass'
+  #   'symlink:bower'
+  #   'livescript:compile'
+  #   'haml:compile'
+  #   'sass:compile'
+  #   'connect:temp'
   #   'requirejs:compile'
-  #   'copy:build'
   #   'requirejs:css'
   #   'cssc:build'
   #   'hashres'
   #   'htmlmin'
-  #   'bytesize'
   # ]

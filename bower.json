@@ -3,5 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "jquery": "2.0.x",
+    "lodash": "2.3.x",
+    "moment": "2.4.x",
+    "normalize-css": "2.x",
+    "cajon": "https://github.com/requirejs/cajon.git",
+    "bourbon": "~3.1.8"
   }
 }

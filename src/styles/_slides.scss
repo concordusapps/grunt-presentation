@@ -1,0 +1,42 @@
+
+// Slide
+// =====
+#slide, [id*="slide_"] {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+// Slide #0001
+// ===========
+#slide_0001 {
+  // margin: auto;
+  // padding: 30px;
+  // text-align: center;
+  h2 {
+    font-size: 40pt;
+    color: #453015;
+  }
+  h3 {
+    color: #555;
+    font-size: 24pt;
+  }
+  img {
+    width: 360px;
+    height: 426px;
+  }
+}
+
+// Slide #0002
+// ===========
+[id*='slide_0']:not(#slide_0001) {
+  padding: 150px;
+  text-align: left;
+  color: rgb(111, 90, 64);
+  h2 {
+    font-size: 48pt;
+  }
+  p {
+    font-size: 28pt;
+    line-height: 1.5em;
+  }
+}

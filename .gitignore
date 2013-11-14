@@ -1,6 +1,9 @@
 # Directory that NPM stores downloaded components.
 /node_modules
 
+# Directory that bower stores downloaded components.
+/bower_components
+
 # Temporary directory where files are built.
 /temp
 
