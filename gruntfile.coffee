@@ -64,6 +64,19 @@ module.exports = (grunt) ->
           ]
         ]
 
+      build:
+        files: [
+          expand: true
+          filter: 'isFile'
+          dest: "build"
+          cwd: "temp"
+          src: [
+            '*',
+            'styles/**/*.css',
+            'slides/**/*.html',
+          ]
+        ]
+
     # Script
     # ------
     livescript:
@@ -170,6 +183,95 @@ module.exports = (grunt) ->
         options: {livereload: true}
         files: ['temp/**/*']
 
+    # Dependency tracing
+    # ------------------
+    requirejs:
+      compile:
+        options:
+          out: "build/scripts/main.js"
+          include: ['main']
+          mainConfigFile: "temp/scripts/main.js"
+          baseUrl: "temp/scripts"
+          keepBuildDir: true
+          cjsTranslate: true
+          almond: true
+          replaceRequireScript: [
+            files: ["temp/index.html"],
+            module: 'main'
+          ]
+          insertRequire: ['main']
+          optimize: 'uglify2'
+
+      css:
+        options:
+          out: "build/styles/main.css"
+          optimizeCss: 'standard.keepLines'
+          cssImportIgnore: null
+          cssIn: "temp/styles/main.css"
+
+    # CSS Compressor
+    # --------------
+    cssc:
+      build:
+        dest: "build/styles/main.css"
+        src: "build/styles/main.css"
+        options:
+          sortSelectors: true
+          lineBreaks: true
+          sortDeclarations: true
+          consolidateViaDeclarations: true
+          consolidateViaSelectors: true
+          consolidateMediaQueries: true
+          compress: true
+          sort: true
+          safe: false
+
+    # HTML Compressor
+    # ---------------
+    htmlmin:
+      build:
+        options:
+          removeComments: true
+          removeCommentsFromCDATA: true
+          removeCDATASectionsFromCDATA: true
+          collapseWhitespace: true
+          collapseBooleanAttributes: true
+          removeAttributeQuotes: true
+          removeRedundantAttributes: true
+          useShortDoctype: true
+          removeEmptyAttributes: true
+          removeOptionalTags: true
+
+        src: "build/index.html"
+        dest: "build/index.html"
+
+    # Resource file hasher
+    # --------------------
+    hashres:
+      options:
+        fileNameFormat: '${name}-${hash}.${ext}'
+        renameFiles: true
+
+      build:
+        src: [
+          "build/styles/main.css"
+          "build/scripts/main.js"
+        ]
+
+        dest: "build/index.html"
+
+    # Filesize reporter
+    # -----------------
+    bytesize:
+      all:
+        files: [
+          src: [
+            "build/index.html",
+            "build/styles/main*.css",
+            "build/scripts/main*.js",
+          ]
+        ]
+
   # Dependencies
   # ============
   # Loads all grunt tasks from the installed NPM modules.
@@ -200,19 +302,21 @@ module.exports = (grunt) ->
     'watch'
   ]
 
-  # # Build
-  # # -----
-  # grunt.registerTask 'build', [
-  #   'clean',
-  #   'copy:static'
-  #   'symlink:bower'
-  #   'livescript:compile'
-  #   'haml:compile'
-  #   'sass:compile'
-  #   'connect:temp'
-  #   'requirejs:compile'
-  #   'requirejs:css'
-  #   'cssc:build'
-  #   'hashres'
-  #   'htmlmin'
-  # ]
+  # Build
+  # -----
+  grunt.registerTask 'build', [
+    'clean',
+    'symlink:bower'
+    'copy:static'
+    'livescript:compile'
+    'haml:compile'
+    'sass:compile'
+    'markdown:render'
+    'requirejs:compile'
+    'copy:build'
+    'requirejs:css'
+    'cssc:build'
+    'hashres'
+    'htmlmin'
+    'bytesize'
+  ]

@@ -20,6 +20,8 @@
     "grunt-cssc": "0.2.x",
     "grunt-hashres": "0.3.x",
     "grunt-haml": "0.8.x",
-    "grunt-markdown": "0.4.x"
+    "grunt-markdown": "0.4.x",
+    "grunt-requirejs": "~0.4.0",
+    "grunt-bytesize": "git+https://github.com/concordusapps/grunt-bytesize.git"
   }
 }

@@ -21,7 +21,7 @@ module.exports = class Application
 
   number: 1
 
-  max-slides: 4
+  max-slides: 5
 
   end: false
 
